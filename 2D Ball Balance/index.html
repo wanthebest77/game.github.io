@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Unity WebGL Player | New Unity Project</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      text-align: center;
+    }
+
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      background: #231F20;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <script src="Build/2D Ball Balance.loader.js"></script>
+  <script>
+    function resizeCanvas() {
+      var canvas = document.getElementById('unity-canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+    }
+
+    window.addEventListener('resize', resizeCanvas, false);
+    window.addEventListener('load', resizeCanvas, false);
+
+    createUnityInstance(document.querySelector("#unity-canvas"), {
+      dataUrl: "Build/2D Ball Balance.data",
+      frameworkUrl: "Build/2D Ball Balance.framework.js",
+      codeUrl: "Build/2D Ball Balance.wasm",
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "DefaultCompany",
+      productName: "New Unity Project",
+      productVersion: "1.0",
+      matchWebGLToCanvasSize: false, // Uncomment this to separately control WebGL canvas render size and DOM element size.
+      // devicePixelRatio: 1, // Uncomment this to override low DPI rendering on high DPI displays.
+    });
+  </script>
+</body>
+
+</html>
