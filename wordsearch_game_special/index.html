@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Noor's Word Search Game!</title>
+</head>
+
+<body>
+    <h2 id="instructions"></h2>
+    <h3 id="themeIntro" style="display: none;">The theme is: <span id="wordTheme"></span></h3>
+
+
+    <div class="container">
+        <div id="setting">
+            <h4 id="time">Time: <span id="timer"></span></h4>
+
+            <select id="selectTime" class="button">
+				<option value="5">5 minutes</option>
+				<option value="10" selected="selected">10 minutes</option>
+				<option value="15">15 minutes</option>
+			</select>
+            <button id="newGameButton" type="button" class="button" onclick="location.reload()">New Game</button>
+            <button id="pauseButton" type="button" class="button">Pause</button>
+            <div id="tutorial">
+                </br>
+                <b>
+					오른쪽 표에서 어휘를 찾아보세요!
+				</b>
+                </br>
+                </br>
+                <b>
+					5분, 10분, 15분 등 3가지 시점이 있습니다.
+				</b>
+                </br>
+                </br>
+                <b>
+못 찾을 경우 돋보기를 이용해 아무 단어나 클릭하면 찾을 수 있는데, 추천 단어를 선택하면 플레이 시간이 단축됩니다.
+				</b>
+
+            </div>
+        </div>
+        <div id="wordboard"></div>
+        <div id="wordlist">
+
+            <div class="listRow">
+                <h4>
+                    English
+                </h4>
+                <h4>
+                    한국어
+                </h4>
+            </div>
+        </div>
+        <div>
+
+            <link rel="stylesheet" type="text/css" href="css/wordsearch.css">
+
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+            <script src="js/wordpaths.js"></script>
+            <script src="js/wordsearchcontroller.js"></script>
+            <script src="js/wordsearchlogic.js"></script>
+            <script src="js/wordsearchview.js"></script>
+
+            <script>
+                var paused = false;
+                var countdownTime = 10 * 60;
+                var timerInterval;
+
+                $(document).ready(function() {
+                    var gameController = new WordSearchController("#wordboard", "#wordlist", "#solveButton", "#newGameButtonn", "#instructions", "#wordTheme");
+                    updateTimer();
+                    timerInterval = setInterval(updateTimer, 1000);
+
+                    document.getElementById('pauseButton').addEventListener('click', function() {
+                        paused = !paused; // Toggle pause state
+                        if (paused) {
+                            document.getElementById('wordboard').style.opacity = '0.1';
+                            document.getElementById('wordboard').style.pointerEvents = 'none';
+                        } else {
+                            document.getElementById('wordboard').style.opacity = '1';
+                            document.getElementById('wordboard').style.pointerEvents = 'auto';
+                        }
+                        var pauseButton = document.getElementById('pauseButton');
+                        pauseButton.textContent = paused ? 'Resume' : 'Pause';
+                    });
+
+                    document.getElementById('selectTime').addEventListener('change', function() {
+                        var selectedTime = this.value;
+                        switch (selectedTime) {
+                            case '5':
+                                countdownTime = 5 * 60;
+                                break;
+                            case '10':
+                                countdownTime = 10 * 60;
+                                break;
+                            case '15':
+                                countdownTime = 15 * 60;
+                                break;
+                            default:
+                                countdownTime = 10 * 60; // Default to 10 minutes if value is invalid
+                                break;
+                        }
+                        updateTimer();
+                        clearInterval(timerInterval);
+                        timerInterval = setInterval(updateTimer, 1000);
+                    });
+                });
+                // Hàm xử lý sự kiện click
+                function disableClick(event) {
+                    event.stopPropagation();
+                    event.preventDefault();
+                }
+
+                // Hàm để bật/tắt sự kiện click
+                function toggleClickListener(enable) {
+                    if (enable) {
+                        // Loại bỏ sự kiện click để bật lại việc nhận tín hiệu click chuột
+                        document.removeEventListener('click', disableClick, true);
+                    } else {
+                        // Thêm sự kiện click để chặn tất cả các sự kiện click chuột
+                        document.addEventListener('click', disableClick, true);
+                    }
+                }
+
+                function myFunction(msg, msg2, type) {
+                    console.log("myFunction called");
+                    updateTimer(true);
+                    toggleClickListener(false); // Tắt việc nhận tín hiệu click chuột
+
+                    if (type == 1) {
+                        speakText(msg)
+                        speakText2(msg2)
+                    } else {
+                        speakText2(msg)
+                        speakText(msg)
+                    }
+                    setTimeout(function() {
+                        toggleClickListener(true);
+                    }, 2000);
+
+                }
+
+                function updateTimer(reduceTime = false) {
+                    if (!paused) {
+                        if (reduceTime) {
+                            countdownTime -= 5; // Giảm đi 5s
+                        }
+                        var minutes = Math.floor(countdownTime / 60);
+                        var seconds = Math.round(countdownTime % 60);
+                        document.getElementById('timer').textContent = (minutes < 10 ? '0' : '') + minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
+                        countdownTime--;
+                        if (countdownTime < 0) {
+                            clearInterval(timerInterval);
+                            document.getElementById('time').textContent = "Time's up!";
+                            alert('당신이 졌어요!');
+                            location.reload();
+                        }
+                    }
+                }
+
+                function speakText(msgeng) {
+                    var msg = new SpeechSynthesisUtterance();
+                    msg.text = msgeng;
+                    msg.lang = 'en-US';
+                    msg.rate = 0.9;
+                    window.speechSynthesis.speak(msg);
+                }
+
+                function speakText2(msgeng) {
+                    var msg = new SpeechSynthesisUtterance();
+                    msg.text = msgeng;
+                    msg.lang = 'ko-KR';
+                    msg.rate = 0.9;
+                    window.speechSynthesis.speak(msg);
+                }
+
+                function stopTimer() {
+                    clearInterval(timerInterval);
+                    document.getElementById('wordboard').style.pointerEvents = 'none';
+                }
+            </script>
+</body>
+
+</html>
